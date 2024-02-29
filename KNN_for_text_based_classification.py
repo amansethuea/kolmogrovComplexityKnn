@@ -28,7 +28,7 @@ for k in K_values:
 best_k = max(cross_val_results, key=cross_val_results.get)
 
 # En iyi K değerini yazdır
-print(f"\nEn iyi K değeri: {best_k}")
+print(f"\nBest K value: {best_k}")
 
 model = KNeighborsClassifier(n_neighbors=1)
 model.fit(vect.fit_transform(questions), pandas.Categorical(Ans).codes)
