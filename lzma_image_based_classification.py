@@ -43,7 +43,8 @@ class ImageClassification(object):
         distances.sort(key=lambda x: x[0])
         # Stores the neighbours as per value of k having the best / smallest NCD values to the input flag image
         k_classes = [distances[i][1] for i in range(k)]
-        print(distances)
+        for dist in distances:
+            print(dist)
         print(k_classes)
         predicted_class = k_classes[0]
         return predicted_class
