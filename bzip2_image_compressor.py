@@ -1,6 +1,11 @@
 import glob
 import bz2
 import os
+import networkx as nx
+import matplotlib.pyplot as plt
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from io import BytesIO
+from PIL import Image
 
 
 class ImageClassification(object):
@@ -43,16 +48,58 @@ class ImageClassification(object):
             distances.append((distance, input_image_y))
         distances.sort(key=lambda x: x[0])
         # Stores the neighbours as per value of k having the best / smallest NCD values to the input flag image
-        k_classes = [distances[i][1] for i in range(k)]
         for dist in distances:
             print(dist)
-        print(k_classes)
-        predicted_class = k_classes[0]
-        return predicted_class
+        get_ncd_with_class = [(distances[i][1], distances[i][0]) for i in range(k)]
+        get_ncd_with_class.append((distances[0][1], distances[0][0]))
+        return get_ncd_with_class
+
+    def create_image_classification_graph(self, input_x, k=3):
+        get_ncd_with_class = self.knn_classifier_without_train(input_x, k=k)
+        # Function to create a graph for image classification using NCD
+        G = nx.Graph()
+        image_paths, ncds = [], []
+        # Add nodes to the graph
+        for image_ncd in get_ncd_with_class:
+            image_paths.append(image_ncd[0])
+            ncds.append(image_ncd[1])
+
+        for i in range(len(image_paths)):
+            for j in range(i + 1, len(image_paths)):
+                if ncds[i] <= 1.0:
+                    G.add_edge(image_paths[i], image_paths[j], weight=ncds[i])
+        return G
+
+    def visualize_graph(self, graph):
+        # Function to visualize the graph with images using matplotlib
+        pos = nx.spring_layout(graph)
+
+        # Create a plot
+        fig, ax = plt.subplots()
+
+        # Draw the graph
+        nx.draw(graph, pos, ax=ax, with_labels=False, font_weight='bold', node_size=500, node_color='skyblue')
+        labels = nx.get_edge_attributes(graph, 'weight')
+        nx.draw_networkx_edge_labels(graph, pos, edge_labels=labels)
+
+        # Add images to nodes
+        for node, (x, y) in pos.items():
+            img = Image.open(node)
+            img.thumbnail((300, 300))
+            img_data = BytesIO()
+            img.save(img_data, format="PNG")
+            img_data.seek(0)
+            img_array = plt.imread(img_data)
+            imagebox = OffsetImage(img_array, zoom=0.1)
+            ab = AnnotationBbox(imagebox, (x, y), frameon=False, pad=0)
+            ax.add_artist(ab)
+
+        plt.show()
 
 
 if __name__ == "__main__":
     obj = ImageClassification()
     choose_flag = "nz.png"
     input_image_x = glob.glob(os.getcwd() + f"/Flags/{choose_flag}")[0]
-    obj.knn_classifier_without_train(input_image_x, k=3)
+    classification_graph = obj.create_image_classification_graph(input_image_x, k=3)
+    obj.visualize_graph(classification_graph)
