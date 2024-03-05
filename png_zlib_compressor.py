@@ -79,7 +79,7 @@ class ImageClassification(object):
         fig, ax = plt.subplots()
 
         # Draw the graph
-        nx.draw(graph, pos, ax=ax, with_labels=False, font_weight='bold', node_size=500, node_color='skyblue')
+        nx.draw(graph, pos, ax=ax, with_labels=False, font_weight='bold', node_size=100, node_color='skyblue')
         labels = nx.get_edge_attributes(graph, 'weight')
         nx.draw_networkx_edge_labels(graph, pos, edge_labels=labels)
 
@@ -91,7 +91,7 @@ class ImageClassification(object):
             img.save(img_data, format="PNG")
             img_data.seek(0)
             img_array = plt.imread(img_data)
-            imagebox = OffsetImage(img_array, zoom=0.1)
+            imagebox = OffsetImage(img_array, zoom=0.15)
             ab = AnnotationBbox(imagebox, (x, y), frameon=False, pad=0)
             ax.add_artist(ab)
 
