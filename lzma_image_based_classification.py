@@ -99,6 +99,7 @@ class ImageClassification(object):
 if __name__ == "__main__":
     obj = ImageClassification()
     choose_flag = "nz.png"
+    # choose_flag = "gb-eng.png"
     input_image_x = glob.glob(os.getcwd() + f"/Flags/{choose_flag}")[0]
     classification_graph = obj.create_image_classification_graph(input_image_x, k=3)
     obj.visualize_graph(classification_graph)
